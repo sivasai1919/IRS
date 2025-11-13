@@ -1,0 +1,37 @@
+!pip install -q networkx
+import xml.etree.ElementTree as ET
+import networkx as nx
+import matplotlib.pyplot as plt
+xml_data = '''
+<pages>
+  <page name="PageA">
+    <link>PageB</link>
+    <link>PageC</link>
+  </page>
+  <page name="PageB">
+    <link>PageC</link>
+  </page>
+  <page name="PageC">
+    <link>PageA</link>
+  </page>
+  <page name="PageD">
+    <link>PageC</link>
+  </page>
+</pages>
+'''
+root = ET.fromstring(xml_data)
+web_graph = nx.DiGraph()
+for page in root.findall('page'):
+    src = page.get('name')
+    web_graph.add_node(src)
+    for link in page.findall('link'):
+        dest = link.text
+        web_graph.add_edge(src, dest)
+plt.figure(figsize=(6, 5))
+nx.draw(web_graph, with_labels=True, node_color='skyblue', edge_color='gray', node_size=2000, font_size=14)
+plt.title("Web Graph", fontsize=16)
+plt.show()
+pagerank_scores = nx.pagerank(web_graph, alpha=0.85)
+print(" PageRank Scores:")
+for page, score in pagerank_scores.items():
+    print(f"{page}: {score:.4f}")
